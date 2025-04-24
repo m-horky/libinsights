@@ -1,22 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
-type ErrorType int
+type ErrorType string
 
 const (
-	ErrInternal ErrorType = iota
+	ErrInternal ErrorType = "Internal error"
 )
 
 // Error provides a high-level object useful for communicating errors.
 type Error struct {
 	// category is a type of error, useful for distinguishing between error states.
 	category ErrorType
-	// original is an error raised by an underlying Go library used by libinsights.
-	original *error
-	// message is a string with placeholders for values, possibly translated.
+	// cause is an error raised by an underlying Go library used by libinsights.
+	cause *error
+	// message is a asString with placeholders for values, possibly translated.
 	message string
 	// variables are
 	variables *map[string]string
@@ -31,12 +32,13 @@ func NewError(
 ) Error {
 	return Error{
 		category:  category,
-		original:  original,
+		cause:     original,
 		message:   message,
 		variables: variables,
 	}
 }
 
+// String provides a human-friendly error message.
 func (e *Error) String() string {
 	result := e.message
 	if e.variables == nil {
@@ -44,6 +46,15 @@ func (e *Error) String() string {
 	}
 	for key, value := range *e.variables {
 		result = strings.Replace(result, "{"+key+"}", value, -1)
+	}
+	return result
+}
+
+// Error provides developer-friendly error message.
+func (e *Error) Error() string {
+	result := fmt.Sprintf("%s: %s", string(e.category), e.String())
+	if e.cause != nil {
+		result = fmt.Sprintf("%s (%v)", result, *e.cause)
 	}
 	return result
 }
