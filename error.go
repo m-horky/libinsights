@@ -1,4 +1,4 @@
-package main
+package libinsights
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ type ErrorType string
 
 const (
 	ErrInternal ErrorType = "Internal error"
+	ErrParsing  ErrorType = "Parsing error"
 )
 
 // Error provides a high-level object useful for communicating errors.
@@ -39,7 +40,7 @@ func NewError(
 }
 
 // String provides a human-friendly error message.
-func (e *Error) String() string {
+func (e Error) String() string {
 	result := e.message
 	if e.variables == nil {
 		return result
@@ -51,7 +52,7 @@ func (e *Error) String() string {
 }
 
 // Error provides developer-friendly error message.
-func (e *Error) Error() string {
+func (e Error) Error() string {
 	result := fmt.Sprintf("%s: %s", string(e.category), e.String())
 	if e.cause != nil {
 		result = fmt.Sprintf("%s (%v)", result, *e.cause)
