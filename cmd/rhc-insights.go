@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -150,10 +151,13 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 	keep := cmd.Bool("keep") || cmd.Bool("no-upload")
 	upload := !cmd.Bool("no-upload")
 
-	fmt.Printf("executing '%s'", collector.Meta.Name)
+	// TODO Do not print temporary text if not in interactive console
+	fmt.Printf("Executing '%s'", collector.Meta.Name)
+	start := time.Now()
+	tempdir, err := Collect(collector)
+	delta := time.Since(start)
 	fmt.Printf("\033[0K\r")
 
-	tempdir, err := Collect(collector)
 	defer func() {
 		if keep {
 			slog.Debug("keeping temporary directory", "path", tempdir)
@@ -170,7 +174,9 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	// TODO Print how long it took.
+	if delta > time.Second {
+		fmt.Printf("Execution of '%s' took %s.\n", collector.Meta.Name, delta.Truncate(time.Second/10))
+	}
 	if keep {
 		fmt.Printf("Data have been kept in '%s'.\n", tempdir)
 	}

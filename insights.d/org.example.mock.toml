@@ -1,6 +1,6 @@
 [meta]
 id = "org.example.mock"
-name = "Mock collector"
+name = "Mock"
 
 [exec]
 shell = "./insights.d/org.example.mock"
