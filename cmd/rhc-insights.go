@@ -15,8 +15,19 @@ import (
 func init() {
 	CONFIGURATIONS_DIR = "./insights.d/"
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	slog.SetDefault(logger)
+	debug := false
+	for _, arg := range os.Args {
+		if arg == "--debug" {
+			debug = true
+			break
+		}
+	}
+	if debug {
+		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		slog.SetDefault(logger)
+	} else {
+		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError})))
+	}
 }
 
 var ErrorNotImplemented = fmt.Errorf("not implemented")
