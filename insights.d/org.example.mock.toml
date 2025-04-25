@@ -1,0 +1,7 @@
+[meta]
+id = "org.example.mock"
+name = "Mock collector"
+
+[exec]
+shell = "./insights.d/org.example.mock"
+content_type = "application/vnd.org.example.mock"
