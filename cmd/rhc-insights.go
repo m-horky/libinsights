@@ -34,6 +34,7 @@ func init() {
 var ErrorNotImplemented = fmt.Errorf("not implemented")
 
 func main() {
+	// TODO Bash completion for collectors and flags
 	cmd := &cli.Command{
 		Name:            "rhc insights",
 		HideHelpCommand: true,
@@ -55,6 +56,9 @@ func main() {
 						Usage: "do not upload data",
 					},
 				},
+				Arguments: []cli.Argument{
+					&cli.StringArgs{Name: "collector", Min: 1, Max: 1},
+				},
 			},
 			{
 				Name:      "ls",
@@ -72,13 +76,19 @@ func main() {
 				Name:      "enable",
 				Action:    doEnable,
 				Usage:     "enable collector timer",
-				UsageText: "rhc insights enable [FLAGS]",
+				UsageText: "rhc insights enable [FLAGS] COLLECTOR",
+				Arguments: []cli.Argument{
+					&cli.StringArgs{Name: "collector", Min: 1, Max: 1},
+				},
 			},
 			{
 				Name:      "disable",
 				Action:    doDisable,
 				Usage:     "disable collector timer",
-				UsageText: "rhc insights disable [FLAGS]",
+				UsageText: "rhc insights disable [FLAGS] COLLECTOR",
+				Arguments: []cli.Argument{
+					&cli.StringArgs{Name: "collector", Min: 1, Max: 1},
+				},
 			},
 		},
 		Flags: []cli.Flag{
@@ -144,7 +154,7 @@ func doRun(ctx context.Context, cmd *cli.Command) error {
 }
 
 func doRunHuman(ctx context.Context, cmd *cli.Command) error {
-	collector, err := GetCollector(cmd.Args().Get(0))
+	collector, err := GetCollector(cmd.StringArgs("collector")[0])
 	if err != nil {
 		return err
 	}
@@ -191,13 +201,15 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 
 func doTimers(ctx context.Context, cmd *cli.Command) error {
 	// TODO If we are not root, pass --user
-	return nil
+	return ErrorNotImplemented
 }
 
 func doEnable(ctx context.Context, cmd *cli.Command) error {
-	return nil
+	// TODO If we are not root, pass --user
+	return ErrorNotImplemented
 }
 
 func doDisable(ctx context.Context, cmd *cli.Command) error {
-	return nil
+	// TODO If we are not root, pass --user
+	return ErrorNotImplemented
 }

@@ -2,6 +2,7 @@ package insights
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -37,7 +38,7 @@ func newCollectorFromPath(path string) (*Collector, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		slog.Error("no such collector", "path", path)
-		return nil, fmt.Errorf("no such collector: '%s'", path)
+		return nil, errors.New("no such collector")
 	}
 
 	data, err := os.ReadFile(path)
