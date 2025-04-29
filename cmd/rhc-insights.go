@@ -10,7 +10,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	. "github.com/RedHatInsights/libinsights"
+	. "github.com/RedHatInsights/rhc-insights"
 )
 
 func init() {

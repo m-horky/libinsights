@@ -1,4 +1,4 @@
-module github.com/RedHatInsights/libinsights
+module github.com/RedHatInsights/rhc-insights
 
 go 1.23.8
 

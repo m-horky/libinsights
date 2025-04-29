@@ -1,4 +1,4 @@
-package libinsights
+package insights
 
 import (
 	"bytes"
