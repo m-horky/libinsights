@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MatusOllah/slogcolor"
+	"github.com/fatih/color"
+	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v3"
 
 	. "github.com/RedHatInsights/rhc-insights"
@@ -23,11 +26,23 @@ func init() {
 			break
 		}
 	}
+
+	opts := slogcolor.DefaultOptions
+	opts.NoColor = !isatty.IsTerminal(os.Stderr.Fd())
+	opts.LevelTags = map[slog.Level]string{
+		slog.LevelDebug: color.New(color.FgYellow, color.Bold).Sprint("DEBUG"),
+		slog.LevelInfo:  color.New(color.FgGreen, color.Bold).Sprint("INFO"),
+		slog.LevelWarn:  color.New(color.FgHiRed, color.Bold).Sprint("WARN"),
+		slog.LevelError: color.New(color.FgRed, color.Bold).Sprint("ERROR"),
+	}
+	opts.MsgPrefix = "> "
 	if debug {
-		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		opts.Level = slog.LevelDebug
+		logger := slog.New(slogcolor.NewHandler(os.Stderr, opts))
 		slog.SetDefault(logger)
 	} else {
-		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError})))
+		opts.Level = slog.LevelError
+		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
 	}
 }
 
@@ -162,7 +177,7 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 	upload := !cmd.Bool("no-upload")
 
 	// TODO Do not print temporary text if not in interactive console
-	fmt.Printf("Executing '%s'", collector.Meta.Name)
+	fmt.Printf("Executing '%s'\n", collector.Meta.Name)
 	start := time.Now()
 	tempdir, err := Collect(collector)
 	delta := time.Since(start)
