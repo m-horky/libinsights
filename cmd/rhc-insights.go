@@ -210,6 +210,19 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
+	archive, err := Compress(tempdir)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = os.Remove(archive)
+		if err == nil {
+			slog.Debug("wiped archive", "path", archive)
+		} else {
+			slog.Warn("did not wipe archive", "path", archive, "err", err)
+		}
+	}()
+
 	// TODO Upload
 	return nil
 }
