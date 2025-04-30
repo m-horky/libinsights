@@ -223,8 +223,7 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 		}
 	}()
 
-	// TODO Upload
-	return nil
+	return Upload(archive, collector.Exec.ContentType)
 }
 
 func doTimers(ctx context.Context, cmd *cli.Command) error {
