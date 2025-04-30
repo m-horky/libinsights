@@ -28,14 +28,9 @@ func (r *Response) String() string {
 }
 
 // Ingress represents the service where we upload archives.
-// FIXME Do not hardcode scheme and hostname
-// FIXME Support proxies
 var Ingress = newService(
 	&url.URL{Scheme: "https", Host: "cert.console.redhat.com:443"},
 	"api/ingress/v1",
-).withCertAuth(
-	"/etc/pki/consumer/cert.pem",
-	"/etc/pki/consumer/key.pem",
 )
 
 // service provides an abstraction over APIs
@@ -52,12 +47,15 @@ func newService(address *url.URL, path string) *service {
 	return &service{URL: address, Path: path}
 }
 
-func (s *service) withCertAuth(certificate, key string) *service {
-	return &service{URL: s.URL, Path: s.Path, ClientCertificate: certificate, ClientKey: key, Proxy: s.Proxy}
+func (s *service) SetCertAuth(certificate, key string) error {
+	s.ClientCertificate = certificate
+	s.ClientKey = key
+	return nil
 }
 
-func (s *service) withProxy(proxy *url.URL) *service {
-	return &service{URL: s.URL, Path: s.Path, ClientCertificate: s.ClientCertificate, ClientKey: s.ClientKey, Proxy: proxy}
+func (s *service) SetProxy(proxy *url.URL) error {
+	s.Proxy = proxy
+	return nil
 }
 
 func (s *service) String() string {

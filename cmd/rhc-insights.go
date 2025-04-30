@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -19,30 +20,59 @@ import (
 func init() {
 	CONFIGURATIONS_DIR = "./insights.d/"
 
-	debug := false
-	for _, arg := range os.Args {
-		if arg == "--debug" {
-			debug = true
-			break
+	{
+		// TODO Log into a file
+		// Configure logging
+		debug := false
+		for _, arg := range os.Args {
+			if arg == "--debug" {
+				debug = true
+				break
+			}
+		}
+
+		opts := slogcolor.DefaultOptions
+		opts.NoColor = !isatty.IsTerminal(os.Stderr.Fd())
+		opts.LevelTags = map[slog.Level]string{
+			slog.LevelDebug: color.New(color.FgYellow, color.Bold).Sprint("DEBUG"),
+			slog.LevelInfo:  color.New(color.FgGreen, color.Bold).Sprint("INFO"),
+			slog.LevelWarn:  color.New(color.FgHiRed, color.Bold).Sprint("WARN"),
+			slog.LevelError: color.New(color.FgRed, color.Bold).Sprint("ERROR"),
+		}
+		opts.MsgPrefix = "> "
+		if debug {
+			opts.Level = slog.LevelDebug
+			logger := slog.New(slogcolor.NewHandler(os.Stderr, opts))
+			slog.SetDefault(logger)
+		} else {
+			opts.Level = slog.LevelError
+			slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
 		}
 	}
 
-	opts := slogcolor.DefaultOptions
-	opts.NoColor = !isatty.IsTerminal(os.Stderr.Fd())
-	opts.LevelTags = map[slog.Level]string{
-		slog.LevelDebug: color.New(color.FgYellow, color.Bold).Sprint("DEBUG"),
-		slog.LevelInfo:  color.New(color.FgGreen, color.Bold).Sprint("INFO"),
-		slog.LevelWarn:  color.New(color.FgHiRed, color.Bold).Sprint("WARN"),
-		slog.LevelError: color.New(color.FgRed, color.Bold).Sprint("ERROR"),
+	{
+		// Configure ingress
+		// TODO Read rhsm.conf (or equivalent)
+		if useStage := os.Getenv("_STAGE"); useStage != "" {
+			slog.Debug("using stage Ingress")
+			Ingress.URL.Host = "cert.console.stage.redhat.com:443"
+		}
+		_ = Ingress.SetCertAuth("/etc/pki/consumer/cert.pem", "/etc/pki/consumer/key.pem")
+		slog.Debug("using certificate authorization")
 	}
-	opts.MsgPrefix = "> "
-	if debug {
-		opts.Level = slog.LevelDebug
-		logger := slog.New(slogcolor.NewHandler(os.Stderr, opts))
-		slog.SetDefault(logger)
-	} else {
-		opts.Level = slog.LevelError
-		slog.SetDefault(slog.New(slogcolor.NewHandler(os.Stderr, opts)))
+
+	{
+		// Configure proxy
+		// TODO Support stuff like HTTPS_PROXY, NO_PROXY
+		if proxyURL := os.Getenv("HTTP_PROXY"); proxyURL != "" {
+			proxy, err := url.Parse(proxyURL)
+			if err != nil {
+				slog.Error("could not parse proxy", "error", err.Error())
+			} else {
+				slog.Debug("using proxy", "url", proxy)
+				Ingress.Proxy = proxy
+			}
+		}
 	}
 }
 
