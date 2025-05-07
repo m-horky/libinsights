@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"net/url"
 	"os"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/MatusOllah/slogcolor"
 	"github.com/fatih/color"
 	"github.com/mattn/go-isatty"
+	"github.com/rodaine/table"
 	"github.com/urfave/cli/v3"
 
 	. "github.com/RedHatInsights/rhc-insights"
@@ -181,11 +183,12 @@ func doListHuman(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	// TODO Create a table with fields 'ID', 'Name', sorted by ID
-	fmt.Println("ID NAME")
+	tbl := table.New("ID", "NAME")
 	for _, collector := range collectors {
-		fmt.Println(collector.Meta.ID, collector.Meta.Name)
+		tbl.AddRow(collector.Meta.ID, collector.Meta.Name)
 	}
+	tbl.Print()
+
 	return nil
 }
 
@@ -257,8 +260,27 @@ func doRunHuman(ctx context.Context, cmd *cli.Command) error {
 }
 
 func doTimers(ctx context.Context, cmd *cli.Command) error {
+	collectors, err := GetCollectors()
+	if err != nil {
+		return err
+	}
+
+	tbl := table.New("ID", "FLAGS", "NEXT")
+	for _, collector := range collectors {
+		tbl.AddRow(collector.Meta.ID, "E ?", fmt.Sprintf("%dh", rand.Uint32()%4+1))
+	}
+	tbl.Print()
+
+	fmt.Println()
+	fmt.Println("E ... Enabled by default   D ... Disabled by default")
+	fmt.Println("e ... Enabled              d ... Disabled")
+	fmt.Println("L ... Locked               ! ... Issue detected")
+	fmt.Println()
+	fmt.Println("More detailed information is available via systemd:")
+	fmt.Println("$ systemctl status rhc-insights-$ID.timer)")
+
 	// TODO If we are not root, pass --user
-	return ErrorNotImplemented
+	return nil
 }
 
 func doEnable(ctx context.Context, cmd *cli.Command) error {
