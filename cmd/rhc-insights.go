@@ -58,7 +58,7 @@ func init() {
 			Ingress.URL.Host = "cert.console.stage.redhat.com:443"
 		}
 		_ = Ingress.SetCertAuth("/etc/pki/consumer/cert.pem", "/etc/pki/consumer/key.pem")
-		slog.Debug("using certificate authorization")
+		slog.Debug("using certificate authentication")
 	}
 
 	{
