@@ -1,6 +1,6 @@
 [meta]
-id = "org.example.mock"
-name = "Mock"
+id = "com.redhat.rhsm.hourly"
+name = "Red Hat Subscription Management for public clouds"
 
 [exec]
 shell = "./insights.d/org.example.mock"
